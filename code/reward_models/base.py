@@ -155,7 +155,11 @@ def init_wandb(
     """
     # Skip init if a run is already active (e.g., from a sweep wrapper)
     if wandb.run is not None:
-        wandb.config.update(config, allow_val_change=True)
+        # Only add keys not already set by the sweep
+        existing = dict(wandb.config)
+        new_keys = {k: v for k, v in config.items() if k not in existing}
+        if new_keys:
+            wandb.config.update(new_keys)
         return True
 
     wandb_project = os.environ.get("WANDB_PROJECT")
