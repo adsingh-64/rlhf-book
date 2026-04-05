@@ -52,6 +52,9 @@ include = ["policy_gradients*", "reward_models*", "direct_alignment*"]
 [tool.uv]
 package = true
 
+[tool.uv.extra-build-dependencies]
+flash-attn = ["torch"]
+
 # PyTorch CUDA wheels - only use cu121 on x86_64 Linux
 # aarch64 (DGX Spark) uses system PyTorch or cu130 wheels
 [[tool.uv.index]]
