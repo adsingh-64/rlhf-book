@@ -1,3 +1,9 @@
+# Usage:
+#   sky launch reward_models/sweep_rm.yaml --env-file .env --env SWEEP_ID=<id> --env SWEEP_COUNT=4
+#
+# Parallel agents (5 nodes, 4 runs each = 20 total):
+#   sky launch reward_models/sweep_rm.yaml --env-file .env --env SWEEP_ID=<id> --env SWEEP_COUNT=4 --num-nodes 5
+
 name: preference-rm-sweep
 
 resources:
