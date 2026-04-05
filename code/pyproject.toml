@@ -7,25 +7,29 @@ license = "Apache-2.0"
 requires-python = ">=3.12"
 dependencies = [
     # Core ML
-    "torch>=2.9.0",
+    "torch>=2.2.0",
     "transformers>=4.40.0",
     "datasets>=2.19.0",
     "accelerate>=0.30.0",
+
     # Config & logging
     "pyyaml>=6.0",
     "pydantic>=2.0.0",
     "wandb>=0.17.0",
     "rich>=13.0.0",
     "tqdm>=4.66.0",
+
     # Policy gradients (procedural datasets)
     "reasoning-gym>=0.1.24",
-    # Flash attention - default for x86_64, provides major speedup
-    # Excluded on aarch64 (DGX Spark) where SDPA is used instead
-    "flash-attn>=2.5.0; platform_machine == 'x86_64'",
-    "runpod>=1.8.2",
+
+    # Flash attention moved to optional - requires matching CUDA toolkit + torch versions
+    # and compiles from source (needs nvcc + ~60GB RAM)
+    # "flash-attn>=2.5.0; platform_machine == 'x86_64'",
 ]
 
 [project.optional-dependencies]
+# Flash attention - optional, requires CUDA toolkit and compiles from source
+flash = ["flash-attn>=2.5.0; platform_machine == 'x86_64'"]
 # For DGX Spark (aarch64 / Blackwell) - no flash-attn, uses PyTorch SDPA
 dgx-spark = []
 
@@ -52,15 +56,11 @@ include = ["policy_gradients*", "reward_models*", "direct_alignment*"]
 [tool.uv]
 package = true
 
-[tool.uv.extra-build-dependencies]
-flash-attn = ["torch"]
-
-# PyTorch CUDA wheels
-# x86_64: cu128 (supports RTX 5090 / Blackwell and backwards compatible with older GPUs)
-# aarch64 (DGX Spark): cu130
+# PyTorch CUDA wheels - only use cu121 on x86_64 Linux
+# aarch64 (DGX Spark) uses system PyTorch or cu130 wheels
 [[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
 explicit = true
 
 [[tool.uv.index]]
@@ -70,7 +70,7 @@ explicit = true
 
 [tool.uv.sources]
 torch = [
-    { index = "pytorch-cu128", marker = "platform_system == 'Linux' and platform_machine == 'x86_64'" },
+    { index = "pytorch-cu121", marker = "platform_system == 'Linux' and platform_machine == 'x86_64'" },
     { index = "pytorch-cu130", marker = "platform_system == 'Linux' and platform_machine == 'aarch64'" },
 ]
 
