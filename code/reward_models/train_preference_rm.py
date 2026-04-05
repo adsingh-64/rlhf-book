@@ -210,6 +210,7 @@ def train_preference_rm(
     grad_accum_steps: int = DEFAULT_GRAD_ACCUM,
     max_length: int = DEFAULT_MAX_LENGTH,
     epochs: int = DEFAULT_EPOCHS,
+    log_interval: int = 50,
     lr: float = DEFAULT_LR,
     seed: int = DEFAULT_SEED,
     use_wandb: bool = True,
@@ -304,7 +305,7 @@ def train_preference_rm(
             total_correct += correct
             total_pairs += r_chosen.size(0)
 
-            if step_idx % 50 == 0:
+            if step_idx % log_interval == 0:
                 acc = total_correct / max(1, total_pairs)
                 print(f"Epoch {epoch} step {step_idx} | loss {loss.item():.4f} | acc {acc:.3f}")
                 log_metrics({

@@ -32,3 +32,6 @@ __pycache__/
 diagrams/generated/
 diagrams/feedback*/
 images/*_tokens.png
+
+# Secrets
+.env

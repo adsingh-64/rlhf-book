@@ -248,7 +248,7 @@ def training_loop(
 
             if step_idx % log_interval == 0:
                 print(f"Epoch {epoch} step {step_idx} | loss {loss.item():.4f}")
-                log_metrics({"loss": loss.item(), **metrics})
+                log_metrics({"loss": loss.item(), **metrics}, step=global_step)
 
         # Log epoch summary
         avg_loss = epoch_loss / len(loader)
