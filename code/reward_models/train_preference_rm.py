@@ -318,6 +318,10 @@ def train_preference_rm(
         avg_loss = total_loss / len(loader)
         accuracy = total_correct / max(1, total_pairs)
         print(f"Epoch {epoch} | Loss: {avg_loss:.4f} | Accuracy: {accuracy:.3f}")
+        log_metrics({
+            "epoch_loss": avg_loss,
+            "epoch_accuracy": accuracy,
+        }, step=global_step)
 
     finish_wandb()
     return model

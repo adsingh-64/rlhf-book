@@ -6,12 +6,8 @@ command:
   - ${program}
 method: bayes
 metric:
-  name: accuracy
-  goal: maximize
-
-early_terminate:
-  type: hyperband
-  min_iter: 50
+  name: epoch_loss
+  goal: minimize
 
 parameters:
   lr:
