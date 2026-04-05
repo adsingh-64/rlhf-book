@@ -153,6 +153,15 @@ def init_wandb(
     Returns:
         True if wandb is enabled, False otherwise
     """
+    # Skip init if a run is already active (e.g., from a sweep wrapper)
+    if wandb.run is not None:
+        # Only add keys not already set by the sweep
+        existing = dict(wandb.config)
+        new_keys = {k: v for k, v in config.items() if k not in existing}
+        if new_keys:
+            wandb.config.update(new_keys)
+        return True
+
     wandb_project = os.environ.get("WANDB_PROJECT")
 
     if use_wandb and wandb_project:
@@ -248,7 +257,7 @@ def training_loop(
 
             if step_idx % log_interval == 0:
                 print(f"Epoch {epoch} step {step_idx} | loss {loss.item():.4f}")
-                log_metrics({"loss": loss.item(), **metrics})
+                log_metrics({"loss": loss.item(), **metrics}, step=global_step)
 
         # Log epoch summary
         avg_loss = epoch_loss / len(loader)

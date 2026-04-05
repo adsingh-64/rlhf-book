@@ -210,6 +210,7 @@ def train_preference_rm(
     grad_accum_steps: int = DEFAULT_GRAD_ACCUM,
     max_length: int = DEFAULT_MAX_LENGTH,
     epochs: int = DEFAULT_EPOCHS,
+    log_interval: int = 10,
     lr: float = DEFAULT_LR,
     seed: int = DEFAULT_SEED,
     use_wandb: bool = True,
@@ -292,32 +293,42 @@ def train_preference_rm(
 
             (loss / grad_accum_steps).backward()
 
+            total_loss += loss.item()
+
+            # Accuracy: how often is r_chosen > r_rejected?
+            acc = (r_chosen > r_rejected).float().mean().item()
+            total_correct += (r_chosen > r_rejected).sum().item()
+            total_pairs += r_chosen.size(0)
+
             if (step_idx + 1) % grad_accum_steps == 0 or (step_idx + 1) == len(loader):
                 optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
 
-            total_loss += loss.item()
-
-            # Accuracy: how often is r_chosen > r_rejected?
-            correct = (r_chosen > r_rejected).sum().item()
-            total_correct += correct
-            total_pairs += r_chosen.size(0)
-
-            if step_idx % 50 == 0:
-                acc = total_correct / max(1, total_pairs)
-                print(f"Epoch {epoch} step {step_idx} | loss {loss.item():.4f} | acc {acc:.3f}")
-                log_metrics({
-                    "loss": loss.item(),
-                    "accuracy": acc,
-                    "r_chosen_mean": r_chosen.mean().item(),
-                    "r_rejected_mean": r_rejected.mean().item(),
-                    "reward_margin": (r_chosen - r_rejected).mean().item(),
-                }, step=global_step)
+                if global_step % log_interval == 0:
+                    print(f"Epoch {epoch} step {global_step} | loss {loss.item():.4f} | acc {acc:.3f}")
+                    log_metrics({
+                        "loss": loss.item(),
+                        "accuracy": acc,
+                        "r_chosen_mean": r_chosen.mean().item(),
+                        "r_rejected_mean": r_rejected.mean().item(),
+                        "reward_margin": (r_chosen - r_rejected).mean().item(),
+                    }, step=global_step)
 
         avg_loss = total_loss / len(loader)
         accuracy = total_correct / max(1, total_pairs)
         print(f"Epoch {epoch} | Loss: {avg_loss:.4f} | Accuracy: {accuracy:.3f}")
+        log_metrics({
+            "epoch_loss": avg_loss,
+            "epoch_accuracy": accuracy,
+        }, step=global_step)
+
+    # Save model weights
+    import os
+    os.makedirs("outputs", exist_ok=True)
+    save_path = "outputs/preference_rm.pt"
+    torch.save(model.state_dict(), save_path)
+    print(f"Model saved to {save_path}")
 
     finish_wandb()
     return model

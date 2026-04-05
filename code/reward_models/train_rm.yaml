@@ -1,0 +1,26 @@
+name: preference-rm
+
+resources:
+  cloud: runpod
+  accelerators: RTX5090:1
+  disk_size: 50
+
+setup: |
+  # Install uv
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  source $HOME/.local/bin/env
+
+  # Clone and install
+  git clone --branch adsingh-64/dev https://github.com/adsingh-64/rlhf-book.git
+  cd rlhf-book/code
+  uv sync
+
+run: |
+  source $HOME/.local/bin/env
+  cd rlhf-book/code
+  uv run python -m reward_models.train_preference_rm \
+    --samples 60000 \
+    --epochs 1 \
+    --batch-size 8 \
+    --grad-accum 4 \
+    --lr 5e-5

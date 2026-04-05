@@ -1,0 +1,21 @@
+name: preference-rm-sweep
+
+resources:
+  cloud: runpod
+  accelerators: RTX5090:1
+  disk_size: 50
+
+setup: |
+  # Install uv
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  source $HOME/.local/bin/env
+
+  # Clone and install
+  git clone --branch adsingh-64/dev https://github.com/adsingh-64/rlhf-book.git
+  cd rlhf-book/code
+  uv sync
+
+run: |
+  source $HOME/.local/bin/env
+  cd rlhf-book/code
+  uv run wandb agent --count ${SWEEP_COUNT:-20} ${SWEEP_ID}
