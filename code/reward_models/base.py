@@ -153,6 +153,11 @@ def init_wandb(
     Returns:
         True if wandb is enabled, False otherwise
     """
+    # Skip init if a run is already active (e.g., from a sweep wrapper)
+    if wandb.run is not None:
+        wandb.config.update(config, allow_val_change=True)
+        return True
+
     wandb_project = os.environ.get("WANDB_PROJECT")
 
     if use_wandb and wandb_project:

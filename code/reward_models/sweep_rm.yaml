@@ -1,4 +1,4 @@
-name: preference-rm
+name: preference-rm-sweep
 
 resources:
   cloud: runpod
@@ -18,8 +18,4 @@ setup: |
 run: |
   source $HOME/.local/bin/env
   cd rlhf-book/code
-  uv run python -m reward_models.train_preference_rm \
-    --samples 10000 \
-    --epochs 1 \
-    --batch-size 8 \
-    --grad-accum 1
+  uv run wandb agent --count 20 ${SWEEP_ID}
