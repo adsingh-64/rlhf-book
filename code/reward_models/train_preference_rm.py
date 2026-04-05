@@ -323,6 +323,13 @@ def train_preference_rm(
             "epoch_accuracy": accuracy,
         }, step=global_step)
 
+    # Save model weights
+    import os
+    os.makedirs("outputs", exist_ok=True)
+    save_path = "outputs/preference_rm.pt"
+    torch.save(model.state_dict(), save_path)
+    print(f"Model saved to {save_path}")
+
     finish_wandb()
     return model
 

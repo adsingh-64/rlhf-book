@@ -18,4 +18,4 @@ setup: |
 run: |
   source $HOME/.local/bin/env
   cd rlhf-book/code
-  uv run wandb agent --count 20 ${SWEEP_ID}
+  uv run wandb agent --count ${SWEEP_COUNT:-20} ${SWEEP_ID}
